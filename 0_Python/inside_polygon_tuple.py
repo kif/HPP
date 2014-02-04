@@ -1,5 +1,5 @@
 #!/usr/bin/python
-
+import numpy, random
 
 
 def insidePolygon(vertices, point, border_value=True):
@@ -30,22 +30,33 @@ def insidePolygon_np(vertices, point, border_value=True):
     """
     Return True/False is a pixel is inside a polygon.
 
-    @param vertices:
+    @param vertices: numpy ndarray Nx2
     @param point: 2-tuple of integers or list
     @param border_value: boolean
     
     Numpy implementation.
     """
-    vx, vy = vertices[:, 0], vertices[:, 1]
-    x, y = point
-    c = 0
-    j = len(vertices) - 1
-    for i in xrange(len(vertices)):
-        if(((vy[i] > y) != (vy[j] > y)) and (x < (vx[j] - vx[i]) *
-                                              (y - vy[i]) / (vy[j] - vy[i]) + vx[i])):
-            c = 1 - c
-        j = i
-    return c
+    counter = 0
+    px, py = point[0], point[1]
+    nvert = vertices.shape[0]
+    polypoint1x, polypoint1y = vertices[nvert - 1, 0], vertices[nvert - 1, 1]
+    for i in range(n):
+        if (polypoint1x == px) and (polypoint1y == py):
+            return border_value
+        polypoint2x, polypoint2y = vertices[i, 0], vertices[i, 1]
+        if (py > min(polypoint1y, polypoint2y)):
+            if (py <= max(polypoint1y, polypoint2y)):
+                if (px <= max(polypoint1x, polypoint2x)):
+                    if (polypoint1y != polypoint2y):
+                        xinters = (py - polypoint1y) * (polypoint2x - polypoint1x) / (polypoint2y - polypoint1y) + polypoint1x
+                        if (polypoint1x == polypoint2x) or (px <= xinters):
+                            counter += 1
+        polypoint1x, polypoint1y = polypoint2x, polypoint2y
+    if counter % 2 == 0:
+        return False
+    else:
+        return True
+
 
 class Polygon(object):
     def __init__(self, vertices):
@@ -53,8 +64,39 @@ class Polygon(object):
         @param vertices: Nx2 array of floats
         """
         self.vertices = vertices
-    def isInside(point):
-        pass
+        self.nvert = vertices.shape[0]
+
+    def isInside(self, point):
+        """
+        Return True/False is a pixel is inside a polygon.
+    
+        @param vertices: numpy ndarray Nx2
+        @param point: 2-tuple of integers or list
+        @param border_value: boolean
+        
+        Numpy implementation.
+        """
+        counter = 0
+        px, py = point[0], point[1]
+        n = self.vertices.shape[0]
+        polypoint1x, polypoint1y = vertices[self.nvert - 1, 0], vertices[self.nvert - 1, 1]
+        for i in range(self.nvert):
+            if (polypoint1x == px) and (polypoint1y == py):
+                return border_value
+            polypoint2x, polypoint2y = vertices[i, 0], vertices[i, 1]
+            if (py > min(polypoint1y, polypoint2y)):
+                if (py <= max(polypoint1y, polypoint2y)):
+                    if (px <= max(polypoint1x, polypoint2x)):
+                        if (polypoint1y != polypoint2y):
+                            xinters = (py - polypoint1y) * (polypoint2x - polypoint1x) / (polypoint2y - polypoint1y) + polypoint1x
+                            if (polypoint1x == polypoint2x) or (px <= xinters):
+                                counter += 1
+            polypoint1x, polypoint1y = polypoint2x, polypoint2y
+        if counter % 2 == 0:
+            return False
+        else:
+            return True
+            pass
 
 
 def make_vertices(nr,max_val=1024):
@@ -69,7 +111,7 @@ def make_vertices_np(nr, max_val=1024):
     Generates a set of vertices as nr-tuple of 2-tuple if integers
     """
     import numpy
-    return numpy.random.randint(0, max_val, nr * 2).reshape((nr, 2))
+    return numpy.random.randint(0, max_val, nr * 2).reshape((nr, 2)).astype(numpy.float32)
 
 if __name__ == "__main__":
     import time
@@ -80,12 +122,22 @@ if __name__ == "__main__":
     t0 = time.time()
     res = []
     for x in range(1024):
-        line = []
-        for y in range(1024):
-            line.append(insidePolygon(vertices, (x, y)))
-        res.append(line)
-    print("execution time: %.3fs" % (time.time() - t0))
-#    print res
+        res.append([insidePolygon(vertices, (x, y)) for y in range(1024)])
+    print("execution time tuples: %.3fs" % (time.time() - t0))
+
+    vertices = numpy.array(vertices,dtype=numpy.float32)
+    print vertices
+    t0 = time.time()
+    res = []
+    for x in range(1024):
+        res.append([insidePolygon_np(vertices, (x, y))  for y in range(1024)])
+    print("execution time numpy: %.3fs" % (time.time() - t0))
+    poly = Polygon(vertices)
+    t0 = time.time()
+    res = []
+    for x in range(1024):
+        res.append([poly.isInside((x, y))  for y in range(1024)])
+    print("execution time numpy: %.3fs" % (time.time() - t0))
 
 
 
