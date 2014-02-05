@@ -1,10 +1,8 @@
 #!/usr/bin/python
 
-#import cython
 cimport cython
 import numpy
 cimport numpy
-from cython.parallel import prange
 
 
 def insidePolygon(vertices, point, border_value=True):
@@ -31,7 +29,7 @@ def insidePolygon(vertices, point, border_value=True):
         return False
     else:
         return True
-    
+
 def insidePolygon_np(vertices, point, border_value=True):
     """
     Return True/False is a pixel is inside a polygon.
@@ -39,8 +37,8 @@ def insidePolygon_np(vertices, point, border_value=True):
     @param vertices: numpy ndarray Nx2
     @param point: 2-tuple of integers or list
     @param border_value: boolean
-    
-    Numpy implementation + Cython optimization 
+
+    Numpy implementation + Cython optimization
     """
     cdef int counter, i, nvert
     cdef float px, py, polypoint1x, polypoint1y, polypoint2x, polypoint2y, xinters
@@ -68,28 +66,25 @@ def insidePolygon_np(vertices, point, border_value=True):
 
 cdef class Polygon(object):
     cdef float[:,:] vertices
-    cdef int nvert   
+    cdef int nvert
     def __init__(self, vertices):
         """
         @param vertices: Nx2 array of floats
         """
         self.vertices = numpy.ascontiguousarray(vertices, dtype=numpy.float32)
         self.nvert = vertices.shape[0]
-    
-    def isInside(self, px, py, border_value=True):
-        return self.c_isInside(px, py, border_value)
-    
-    @cython.cdivision(True)    
+
+    @cython.cdivision(True)
     @cython.wraparound(False)
     @cython.boundscheck(False)
-    cdef bint c_isInside(self, float px, float py, bint border_value=True) nogil:
+    cpdef bint isInside(self, float px, float py, bint border_value=True):
         """
         Pure C_Cython class implementation
         """
         cdef int counter, i
         cdef float polypoint1x, polypoint1y, polypoint2x, polypoint2y, xinters
         counter = 0
- 
+
         polypoint1x, polypoint1y = self.vertices[self.nvert-1, 0],self.vertices[self.nvert-1, 1]
         for i in range(self.nvert):
             if (polypoint1x == px) and (polypoint1y == py):
@@ -113,10 +108,11 @@ cdef class Polygon(object):
     def make_mask(self, int dx, int dy):
         cdef numpy.ndarray[dtype=numpy.uint8_t,ndim=2] mask = numpy.empty((dx,dy),dtype=numpy.uint8)
         cdef int i, j
-        for i in prange(dx, nogil=True):
+        for i in range(dx):
             for j in range(dy):
-                mask[i,j] = self.c_isInside(i,j)
-        
+                mask[i,j] = self.isInside(j,i)
+        return mask
+
 
 def make_vertices(nr,max_val=1024):
     """
@@ -149,4 +145,4 @@ if __name__ == "__main__":
 
 
 
-    
+
