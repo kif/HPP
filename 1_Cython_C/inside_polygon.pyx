@@ -1,31 +1,24 @@
 #!/usr/bin/python
 
-import cython.view
 cimport cython
 import numpy
 cimport numpy
-from cython.parallel import prange
 
-from InsidePolygonWithBounds cimport PointsInsidePolygon
+from InsidePolygonWithBounds cimport  PointsInsidePolygon
 
-def insidePolygon_c(vertices, point, border_value=True):
-    """
-    Return True/False is a pixel is inside a polygon.
-
-    @param vertices: numpy ndarray Nx2
-    @param point: 2-tuple of integers or list
-    @param border_value: boolean
-
-    C implementation wrapped with Cython
-    """
+def make_mask(vertices, shape, bint border_value=True):
+    cdef int i, j, npoint = shape[0]*shape[1], width = shape[1], nvert = vertices.shape[0]
     cdef double[:,:] c_vertices =  numpy.ascontiguousarray(vertices, dtype=numpy.float64)
-    cdef double[:,:] c_points =  numpy.ascontiguousarray(point, dtype=numpy.float64)
-    cdef unsigned char[:] res=cython.view.array()
-    cdef int nvert = vertices.shape[0]
-    cdef bint c_border_value = border_value
+    cdef double[:,:] c_points = numpy.empty((npoint,2), dtype=numpy.float64)
+    cdef numpy.ndarray[dtype=numpy.uint8_t,ndim=2] mask = numpy.empty(shape, dtype=numpy.uint8)
+    for i in range(shape[0]):
+        for j in range(width):
+            c_points[i*width+j,0] = <double>i
+            c_points[i*width+j,1] = <double>j
     PointsInsidePolygon(&c_vertices[0,0], nvert , \
-                        &c_points[0,0], 1, c_border_value, )
-    return res[0]
+                        &c_points[0,0], npoint, border_value,\
+                        &mask[0,0])
+    return mask 
 
 def insidePolygon(vertices, point, border_value=True):
     """
@@ -133,10 +126,10 @@ cdef class Polygon(object):
     def make_mask(self, int dx, int dy):
         cdef numpy.ndarray[dtype=numpy.uint8_t,ndim=2] mask = numpy.empty((dx,dy),dtype=numpy.uint8)
         cdef int i, j
-        for i in prange(dx, nogil=True):
+        for i in range(dx):
             for j in range(dy):
                 mask[i,j] = self.c_isInside(i,j)
-
+        return mask
 
 def make_vertices(nr,max_val=1024):
     """
