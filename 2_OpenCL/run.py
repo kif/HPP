@@ -21,13 +21,16 @@ if __name__ == "__main__":
     src = open("inside_polygon.cl").read()
     prg = pyopencl.Program(ctx, src).build()
 
-    t0 = time.time()
-    d_vertices = pyopencl.array.to_device(queue, vertices)
-    d_result = pyopencl.array.empty(queue, (L,L), numpy.uint8)
-    evt = prg.insidePolygon(queue, (L,L), (32,1), 
-                            d_vertices.data, numpy.int32(N), numpy.uint8(1), d_result.data)
-    res = d_result.get()
-    print("execution time OpenCL: %.3fs Actual kernel execution time: %.6fs" % (time.time() - t0, 1e-9 * (evt.profile.end - evt.profile.start)))
+
+    for i in range(10):
+        j = 2 ** i
+        t0 = time.time()
+        d_vertices = pyopencl.array.to_device(queue, vertices)
+        d_result = pyopencl.array.empty(queue, (L, L), numpy.uint8)
+        evt = prg.insidePolygon(queue, (L, L), (j, 1),
+                                d_vertices.data, numpy.int32(N), numpy.uint8(1), d_result.data)
+        res = d_result.get()
+        print("execution time OpenCL all: %.3fs kernel: %.6fs, workgoup: %i" % (time.time() - t0, 1e-9 * (evt.profile.end - evt.profile.start), j))
     msk = res
 
     import pylab
