@@ -32,6 +32,9 @@ if __name__ == "__main__":
 #    t0 = time.time()
 #    msk = poly.make_mask(L, L)
 #    print("execution time Cython+Numpy+class+Opt+OpenMP: %.3fs" % (time.time() - t0))
+    import sys
+    if len(sys.argv)==2 and sys.argv[1]=="-q":
+        sys.exit()
     import pylab
     pylab.imshow(msk.T)
     last = vertices[-1]

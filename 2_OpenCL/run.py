@@ -37,6 +37,10 @@ if __name__ == "__main__":
             print("execution time OpenCL all: %.3fs kernel: NA, workgoup: %i" % (t1 - t0, j)) 
     msk = res
 
+    import sys
+    if len(sys.argv)==2 and sys.argv[1]=="-q":
+        sys.exit()
+
     import pylab
     pylab.imshow(msk)
     last = vertices[-1]

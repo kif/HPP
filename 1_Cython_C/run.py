@@ -16,6 +16,10 @@ if __name__ == "__main__":
     msk = inside_polygon.make_mask(vertices, (L, L))
     print("execution time Cython+C: %.3fs" % (time.time() - t0))
 
+    import sys
+    if len(sys.argv)==2 and sys.argv[1]=="-q":
+        sys.exit()
+
     import pylab
     pylab.imshow(msk.T)
     last = vertices[-1]
