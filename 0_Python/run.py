@@ -17,6 +17,7 @@ import time
 display = False
 
 if __name__ == "__main__":
+    import time
     N = 24
     L = 1024
     vertices = inside_polygon.make_vertices(N)
@@ -28,6 +29,7 @@ if __name__ == "__main__":
         res.append([inside_polygon.in_polygon(vertices, (x, y)) for y in range(L)])
     print("execution time tuples: %.3fs" % (time.time() - t0))
 
+    import numpy
     vertices = numpy.array(vertices, dtype=numpy.float32)
     # print vertices
     t0 = time.time()
@@ -46,12 +48,14 @@ if __name__ == "__main__":
 #    t0 = time.time()
 #    msk = poly.make_mask(L, L)
 #    print("execution time Cython+Numpy+class+Opt+OpenMP: %.3fs" % (time.time() - t0))
-    if display:
-        import pylab
-        pylab.imshow(msk.T)
-        last = vertices[-1]
-        for v in vertices:
-            pylab.annotate("", xy=v, xytext=last, xycoords="data",
-                           arrowprops=dict(arrowstyle="-"))
-            last = v
-        pylab.show()
+    import sys
+    if len(sys.argv)==2 and sys.argv[1]=="-q":
+        sys.exit()
+    import pylab
+    pylab.imshow(msk.T)
+    last = vertices[-1]
+    for v in vertices:
+        pylab.annotate("", xy=v, xytext=last, xycoords="data",
+                 arrowprops=dict(arrowstyle="-"))
+        last = v
+    pylab.show()

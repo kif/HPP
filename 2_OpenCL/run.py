@@ -30,8 +30,16 @@ if __name__ == "__main__":
         evt = prg.insidePolygon(queue, (L, L), (j, 1),
                                 d_vertices.data, numpy.int32(N), numpy.uint8(1), d_result.data)
         res = d_result.get()
-        print("execution time OpenCL all: %.3fs kernel: %.6fs, workgoup: %i" % (time.time() - t0, 1e-9 * (evt.profile.end - evt.profile.start), j))
+        t1 = time.time()
+        try:
+            print("execution time OpenCL all: %.3fs kernel: %.6fs, workgoup: %i" % (t1 - t0, 1e-9 * (evt.profile.end - evt.profile.start), j))
+        except:
+            print("execution time OpenCL all: %.3fs kernel: NA, workgoup: %i" % (t1 - t0, j)) 
     msk = res
+
+    import sys
+    if len(sys.argv)==2 and sys.argv[1]=="-q":
+        sys.exit()
 
     import pylab
     pylab.imshow(msk)
