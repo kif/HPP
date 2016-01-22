@@ -1,8 +1,14 @@
+#!/usr/bin/env python
+#coding: utf-8
+
 import inside_polygon
+import time
+
+n = 24
+L = 1024
+
 if __name__ == "__main__":
-    import time
-    n = 24
-    L = 1024
+
     vertices = inside_polygon.make_vertices_np(n, L)
     print vertices
 
@@ -17,7 +23,7 @@ if __name__ == "__main__":
     print("execution time Cython+C: %.3fs" % (time.time() - t0))
 
     import sys
-    if len(sys.argv)==2 and sys.argv[1]=="-q":
+    if len(sys.argv) == 2 and sys.argv[1] == "-q":
         sys.exit()
 
     import pylab

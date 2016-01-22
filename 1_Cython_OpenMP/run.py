@@ -1,8 +1,10 @@
+import sys
+import time
 import inside_polygon
+N = 24
+L = 1024
+
 if __name__ == "__main__":
-    import time
-    N = 24
-    L = 1024
     vertices = inside_polygon.make_vertices_np(N)
     print vertices
     poly = inside_polygon.Polygon(vertices)
@@ -11,8 +13,7 @@ if __name__ == "__main__":
     msk = poly.make_mask(L, L)
     print("execution time Cython+Numpy+class+Opt+OpenMP: %.3fs" % (time.time() - t0))
 
-    import sys
-    if len(sys.argv)==2 and sys.argv[1]=="-q":
+    if len(sys.argv) == 2 and sys.argv[1] == "-q":
         sys.exit()
 
     import pylab

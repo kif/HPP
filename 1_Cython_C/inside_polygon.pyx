@@ -20,7 +20,7 @@ def make_mask(vertices, shape, bint border_value=True):
                         &mask[0,0])
     return mask 
 
-def insidePolygon(vertices, point, border_value=True):
+def inside_polygon(vertices, point, border_value=True):
     """
     Return True/False is a pixel is inside a polygon.
 
@@ -45,7 +45,7 @@ def insidePolygon(vertices, point, border_value=True):
     else:
         return True
 
-def insidePolygon_np(vertices, point, border_value=True):
+def inside_polygon_np(vertices, point, border_value=True):
     """
     Return True/False is a pixel is inside a polygon.
 
@@ -155,7 +155,7 @@ if __name__ == "__main__":
     for x in range(1024):
         line = []
         for y in range(1024):
-            line.append(insidePolygon(vertices, (x, y)))
+            line.append(inside_polygon(vertices, (x, y)))
         res.append(line)
     print("execution time: %.3fs" % (time.time() - t0))
 #    print res
