@@ -10,6 +10,7 @@ __copyright__ = "2014-16 ESRF"
 __contact__ = "Jerome.Kieffer@esrf.fr"
 __license__ = "MIT"
 
+
 import numpy
 import random
 
@@ -52,12 +53,12 @@ def in_polygon_np(vertices, point, border_value=True):
     """
     counter = 0
     px, py = point[0], point[1]
-    nvert = vertices.shape[0]
-    polypoint1x, polypoint1y = vertices[nvert - 1, 0], vertices[nvert - 1, 1]
+    nvert = len(vertices)
+    polypoint1x, polypoint1y = vertices[-1]
     for i in range(nvert):
         if (polypoint1x == px) and (polypoint1y == py):
             return border_value
-        polypoint2x, polypoint2y = vertices[i, 0], vertices[i, 1]
+        polypoint2x, polypoint2y = vertices[i]
         if (py > min(polypoint1y, polypoint2y)):
             if (py <= max(polypoint1y, polypoint2y)):
                 if (px <= max(polypoint1x, polypoint2x)):
@@ -78,27 +79,26 @@ class Polygon(object):
         @param vertices: Nx2 array of floats
         """
         self.vertices = vertices
-        self.nvert = vertices.shape[0]
+        self.nvert = len(vertices)
 
     def is_inside(self, point, border_value=True):
         """Return True/False if a pixel is inside the polygon.
-        
+
         Numpy implementation.
-        
+
         @param vertices: numpy ndarray Nx2
         @param point: 2-tuple of integers or list
         @param border_value: boolean
 
-        
+
         """
         counter = 0
         px, py = point[0], point[1]
-        n = self.vertices.shape[0]
-        polypoint1x, polypoint1y = self.vertices[self.nvert - 1, 0], self.vertices[self.nvert - 1, 1]
+        polypoint1x, polypoint1y = self.vertices[-1]
         for i in range(self.nvert):
             if (polypoint1x == px) and (polypoint1y == py):
                 return border_value
-            polypoint2x, polypoint2y = self.vertices[i, 0], self.vertices[i, 1]
+            polypoint2x, polypoint2y = self.vertices[i]
             if (py > min(polypoint1y, polypoint2y)):
                 if (py <= max(polypoint1y, polypoint2y)):
                     if (px <= max(polypoint1x, polypoint2x)):
@@ -113,10 +113,39 @@ class Polygon(object):
             return True
             pass
 
+def polygon_vec(vertices, L, border_value=True):
+    """
+    Return True/False is a pixel is inside a polygon.
+
+    @param vertices: numpy ndarray Nx2
+    @param L: size of the image
+    @param border_value: boolean
+
+    Numpy vectorial implementation.
+    """
+    y, x = numpy.ogrid[:L, :L]
+    counter = numpy.zeros((L, L), dtype=int)
+    nvert = len(vertices)
+    polypoint1y, polypoint1x = vertices[nvert - 1][0], vertices[nvert - 1][1]
+    for i in range(nvert):
+        polypoint2y, polypoint2x = vertices[i][0], vertices[i][1]
+        if (polypoint1y == polypoint2y):
+            counter[polypoint1y, min(polypoint1x, polypoint2x):min(L, 1 + max(polypoint1x, polypoint2x))] += border_value
+        elif (polypoint1x == polypoint2x):
+            counter[min(polypoint1y, polypoint2y):min(L, 1 + max(polypoint1y, polypoint2y)), polypoint1x] += border_value
+        else:
+            c1 = (y > min(polypoint1y, polypoint2y))
+            c2 = (y <= max(polypoint1y, polypoint2y))
+            c3 = (x <= max(polypoint1x, polypoint2x))
+            xinters = (y - polypoint1y) * (polypoint2x - polypoint1x) / (polypoint2y - polypoint1y) + polypoint1x
+            counter[ numpy.logical_and(numpy.logical_and(c1, c2), numpy.logical_and(c3, x <= xinters))] += 1
+        polypoint1x, polypoint1y = polypoint2x, polypoint2y
+    return counter % 2 == 1
+
 
 def make_vertices(nr, max_val=1024):
     """Generates a set of vertices as nr-tuple of 2-tuple of integers
-    
+
     @return: tuple of 2-tuple
     """
     return tuple([(random.randint(0, max_val), random.randint(0, max_val)) for i in range(nr)])
@@ -124,7 +153,7 @@ def make_vertices(nr, max_val=1024):
 
 def make_vertices_np(nr, max_val=1024):
     """Generates a set of vertices as nr-tuple of 2-tuple of integers
-    
+
     @return: numpy array of shape (nr,2)
     """
     return numpy.random.randint(0, max_val, nr * 2).reshape((nr, 2)).astype(numpy.float32)

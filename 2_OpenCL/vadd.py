@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+#coding: utf-8
 
 import numpy
 import pyopencl
@@ -27,4 +28,4 @@ prg.vadd(queue, h_a.shape, (8,) , d_a, d_b, d_c, numpy.int32(L))
 
 # return results
 pyopencl.enqueue_copy(queue, h_c, d_c)
-print numpy.allclose(h_a + h_b, h_c)
+print(numpy.allclose(h_a + h_b, h_c))

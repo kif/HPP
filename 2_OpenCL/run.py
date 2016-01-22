@@ -15,7 +15,7 @@ if __name__ == "__main__":
     N = 24
     L = 1024
     vertices = make_vertices_np(N, L)
-    print vertices
+    print(vertices)
 
     ctx = pyopencl.create_some_context()
     queue = pyopencl.CommandQueue(ctx, 
