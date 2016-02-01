@@ -113,6 +113,7 @@ class Polygon(object):
             return True
             pass
 
+
 def polygon_vec(vertices, L, border_value=True):
     """
     Return True/False is a pixel is inside a polygon.
@@ -130,17 +131,14 @@ def polygon_vec(vertices, L, border_value=True):
     for i in range(nvert):
         polypoint2y, polypoint2x = vertices[i][0], vertices[i][1]
         if (polypoint1y == polypoint2y):
-            counter[polypoint1y, min(polypoint1x, polypoint2x):min(L, 1 + max(polypoint1x, polypoint2x))] += border_value
-        elif (polypoint1x == polypoint2x):
-            counter[min(polypoint1y, polypoint2y):min(L, 1 + max(polypoint1y, polypoint2y)), polypoint1x] += border_value
+            counter[polypoint1y, min(polypoint1x, polypoint2x):max(polypoint1x, polypoint2x)] += 1
         else:
-            c1 = (y > min(polypoint1y, polypoint2y))
-            c2 = (y <= max(polypoint1y, polypoint2y))
-            c3 = (x <= max(polypoint1x, polypoint2x))
+            c = numpy.logical_and(y > min(polypoint1y, polypoint2y), y <= max(polypoint1y, polypoint2y))
             xinters = (y - polypoint1y) * (polypoint2x - polypoint1x) / (polypoint2y - polypoint1y) + polypoint1x
-            counter[ numpy.logical_and(numpy.logical_and(c1, c2), numpy.logical_and(c3, x <= xinters))] += 1
+            counter[ numpy.logical_and(c, x <= xinters)] += 1
         polypoint1x, polypoint1y = polypoint2x, polypoint2y
-    return counter % 2 == 1
+    res = counter % 2 == 1
+    return res
 
 
 def make_vertices(nr, max_val=1024):
