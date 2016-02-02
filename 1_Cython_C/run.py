@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#coding: utf-8
+# coding: utf-8
 
 import inside_polygon
 import time
@@ -12,16 +12,16 @@ if __name__ == "__main__":
     vertices = inside_polygon.make_vertices_np(n, L)
     print vertices
 
-    poly = inside_polygon.Polygon(vertices)
-    t0 = time.time()
-    msk = poly.make_mask(L, L)
-    print("execution time Cython+classes: %.3fs" % (time.time() - t0))
+#     poly = inside_polygon.Polygon(vertices)
+#     t0 = time.time()
+#     msk = poly.make_mask(L, L)
+#     print("execution time Cython+classes: %.3fs" % (time.time() - t0))
 
 
     t0 = time.time()
     msk = inside_polygon.make_mask(vertices, (L, L))
     print("execution time Cython+C: %.3fs" % (time.time() - t0))
-
+#     print(msk)
     import sys
     if len(sys.argv) == 2 and sys.argv[1] == "-q":
         sys.exit()

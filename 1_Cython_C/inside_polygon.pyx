@@ -6,11 +6,28 @@ cimport numpy
 
 from InsidePolygonWithBounds cimport  PointsInsidePolygon
 
-def make_mask(vertices, shape, bint border_value=True):
-    cdef int i, j, npoint = shape[0]*shape[1], width = shape[1], nvert = vertices.shape[0]
-    cdef double[:,:] c_vertices =  numpy.ascontiguousarray(vertices, dtype=numpy.float64)
-    cdef double[:,:] c_points = numpy.empty((npoint,2), dtype=numpy.float64)
-    cdef numpy.ndarray[dtype=numpy.uint8_t,ndim=2] mask = numpy.empty(shape, dtype=numpy.uint8)
+def make_mask(vertices, tuple shape not None, bint border_value=True):
+    """Creates a mask from a set of vertices
+    
+    @param vertices: list/tuple or numpy array with points
+    @param shape: shape of the mask
+    @param border_value: value for the points themselves.
+    @return: mask
+    """
+    cdef:
+        int i, j, npoint, width,nvert 
+        double[:,:] c_vertices, c_points
+        numpy.uint8_t[:,:] mask
+        #numpy.ndarray[dtype=numpy.uint8_t,ndim=2] mask
+
+    npoint = shape[0] * shape[1] 
+    width = shape[1]
+    nvert = vertices.shape[0]
+    
+    c_vertices =  numpy.ascontiguousarray(vertices, dtype=numpy.float64)
+    c_points = numpy.empty((npoint,2), dtype=numpy.float64)
+    mask = numpy.empty(shape, dtype=numpy.uint8)
+    
     for i in range(shape[0]):
         for j in range(width):
             c_points[i*width+j,0] = <double>i
@@ -18,7 +35,7 @@ def make_mask(vertices, shape, bint border_value=True):
     PointsInsidePolygon(&c_vertices[0,0], nvert , \
                         &c_points[0,0], npoint, border_value,\
                         &mask[0,0])
-    return mask 
+    return numpy.asarray(mask)
 
 def inside_polygon(vertices, point, border_value=True):
     """
