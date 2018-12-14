@@ -85,11 +85,13 @@ cdef class Polygon(object):
         cdef float polypoint1x, polypoint1y, polypoint2x, polypoint2y, xinters
         counter = 0
 
-        polypoint1x, polypoint1y = self.vertices[self.nvert-1, 0],self.vertices[self.nvert-1, 1]
+        polypoint1x = self.vertices[self.nvert-1, 0]
+        polypoint1y = self.vertices[self.nvert-1, 1]
         for i in range(self.nvert):
             if (polypoint1x == px) and (polypoint1y == py):
                 return border_value
-            polypoint2x, polypoint2y = self.vertices[i, 0],self.vertices[i, 1]
+            polypoint2x = self.vertices[i, 0]
+            polypoint2y = self.vertices[i, 1]
             if (py > min(polypoint1y, polypoint2y)):
                 if (py <= max(polypoint1y, polypoint2y)):
                     if (px <= max(polypoint1x, polypoint2x)):
